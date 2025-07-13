@@ -81,9 +81,14 @@
         display = word;
       }
 
-      return (
-        React.createElement('div', { className: 'space-y-4' },
-          React.createElement('h2', { className: 'text-xl font-bold text-center' }, display),
+        return (
+          React.createElement('div', { className: 'space-y-4' },
+            React.createElement('h2', { className: 'text-xl font-bold text-center' }, display),
+            React.createElement('img', {
+              className: 'mx-auto w-40 h-40 object-cover rounded',
+              src: `https://source.unsplash.com/featured/300x300?${word}`,
+              alt: word
+            }),
 
           // 👉 Invoerveld (alle modes hetzelfde)
           React.createElement('input', {
