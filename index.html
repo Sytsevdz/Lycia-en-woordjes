@@ -13,7 +13,7 @@
     }
     h1 {
       text-align: center;
-      color: #a855f7; /* paars accent */
+      color: #a855f7;
     }
     .exercise {
       border: 2px solid #000;
@@ -50,7 +50,7 @@
       margin-top: 0.5rem;
       padding: 0.5rem 1rem;
       font-size: 1rem;
-      background: #a855f7; /* paars */
+      background: #a855f7;
       color: #fff;
       border: none;
       cursor: pointer;
@@ -73,12 +73,12 @@
       cursor: pointer;
     }
     .option.correct {
-      background: #4ade80; /* groen */
+      background: #4ade80;
       border-color: #4ade80;
       color: #fff;
     }
     .option.wrong {
-      background: #a855f7; /* paars */
+      background: #a855f7;
       border-color: #a855f7;
       color: #fff;
     }
@@ -86,48 +86,39 @@
 </head>
 <body>
   <h1>Klank- en letteroefeningen</h1>
-  <div id="fill-exercises"></div>
-  <div id="choice-exercises"></div>
-
+  <div id="exercise"></div>
 <script>
-const images = {
-  tree: `<svg width="80" height="80" viewBox="0 0 64 64" stroke="black" stroke-width="3" fill="none">
-    <circle cx="32" cy="20" r="15"/>
-    <line x1="32" y1="35" x2="32" y2="55"/>
-    <line x1="32" y1="40" x2="22" y2="50"/>
-    <line x1="32" y1="40" x2="42" y2="50"/>
-  </svg>`,
-  roof: `<svg width="80" height="80" viewBox="0 0 64 64" stroke="black" stroke-width="3" fill="none">
-    <path d="M10 30 L32 10 L54 30 V54 H10 V30 Z"/>
-    <rect x="25" y="36" width="14" height="18"/>
-  </svg>`,
-  bed: `<svg width="80" height="80" viewBox="0 0 64 64" stroke="black" stroke-width="3" fill="none">
-    <rect x="10" y="28" width="44" height="18"/>
-    <line x1="10" y1="46" x2="10" y2="54"/>
-    <line x1="54" y1="46" x2="54" y2="54"/>
-    <line x1="10" y1="36" x2="54" y2="36"/>
-  </svg>`
-};
+const ICONS = { boom: '🌳', dak: '🏠', bed: '🛏️' };
 
-const fillData = [
-  { word: 'boom', image: 'tree', blanks: [{index: 0, letter: 'b'}] },
-  { word: 'dak', image: 'roof', blanks: [{index: 0, letter: 'd'}] },
-  { word: 'bed', image: 'bed', blanks: [{index: 0, letter: 'b'}, {index: 2, letter: 'd'}] }
+const exercises = [
+  { type: 'fill', word: 'boom', blanks: [{index:0, letter:'b'}] },
+  { type: 'fill', word: 'dak',  blanks: [{index:0, letter:'d'}] },
+  { type: 'fill', word: 'bed',  blanks: [{index:0, letter:'b'}, {index:2, letter:'d'}] },
+  { type: 'choice', word: 'boom', correct: 'b', options: ['b','d','p'] },
+  { type: 'choice', word: 'dak',  correct: 'd', options: ['b','d','p'] },
+  { type: 'choice', word: 'bed',  correct: 'd', options: ['b','d','p'] }
 ];
 
-const choiceData = [
-  { image: 'tree', correct: 'b', options: ['b','d','p'] },
-  { image: 'roof', correct: 'd', options: ['b','d','p'] },
-  { image: 'bed',  correct: 'd', options: ['b','d','p'] }
-];
+let current = 0;
 
-function createFillExercise(data) {
-  const container = document.createElement('div');
-  container.className = 'exercise';
+function nextExercise(){
+  const container = document.getElementById('exercise');
+  container.innerHTML = '';
+  if(current >= exercises.length) current = 0;
+  const data = exercises[current++];
+  if(data.type === 'fill') showFill(data, container);
+  else showChoice(data, container);
+}
+
+function showFill(data, container){
+  const box = document.createElement('div');
+  box.className = 'exercise';
+
   const img = document.createElement('div');
   img.className = 'img-wrap';
-  img.innerHTML = images[data.image];
-  container.appendChild(img);
+  img.style.fontSize = '4rem';
+  img.textContent = ICONS[data.word] || '❓';
+  box.appendChild(img);
 
   const wordBox = document.createElement('div');
   wordBox.className = 'word-box';
@@ -146,30 +137,36 @@ function createFillExercise(data) {
       wordBox.appendChild(span);
     }
   });
-  container.appendChild(wordBox);
+  box.appendChild(wordBox);
 
   const btn = document.createElement('button');
   btn.textContent = 'Controleer';
   btn.addEventListener('click', () => {
+    if(btn.dataset.checked){
+      nextExercise();
+      return;
+    }
     let ok = true;
     wordBox.querySelectorAll('input').forEach(inp => {
       if(inp.value.toLowerCase() !== inp.dataset.correct) ok = false;
     });
     if(ok){
-      btn.textContent = 'Goed gedaan!';
+      btn.textContent = 'Goed gedaan! Volgende';
       btn.style.background = '#4ade80';
-    }else{
-      btn.textContent = 'Probeer opnieuw';
+    } else {
+      btn.textContent = 'Helaas, volgende';
       btn.style.background = '#a855f7';
     }
+    btn.dataset.checked = 'true';
   });
-  container.appendChild(btn);
-  document.getElementById('fill-exercises').appendChild(container);
+  box.appendChild(btn);
+  container.appendChild(box);
 }
 
-function createChoiceExercise(data){
-  const container = document.createElement('div');
-  container.className = 'exercise';
+function showChoice(data, container){
+  const box = document.createElement('div');
+  box.className = 'exercise';
+
   const row = document.createElement('div');
   row.style.display = 'flex';
   row.style.alignItems = 'center';
@@ -177,38 +174,45 @@ function createChoiceExercise(data){
   row.style.gap = '1rem';
 
   const img = document.createElement('div');
-  img.innerHTML = images[data.image];
+  img.style.fontSize = '4rem';
+  img.textContent = ICONS[data.word] || '❓';
   row.appendChild(img);
 
   const opts = document.createElement('div');
   opts.className = 'options';
+  let clicked = false;
   data.options.forEach(letter => {
     const opt = document.createElement('div');
     opt.className = 'option';
     opt.textContent = letter;
     opt.addEventListener('click', () => {
-      if(opts.dataset.done) return;
-      opts.dataset.done = 'true';
+      if(clicked) return;
+      clicked = true;
       if(letter === data.correct){
         opt.classList.add('correct');
       } else {
         opt.classList.add('wrong');
         Array.from(opts.children).forEach(o => {
-          if(o.textContent === data.correct){
-            o.classList.add('correct');
-          }
+          if(o.textContent === data.correct) o.classList.add('correct');
         });
       }
+      nextBtn.style.display = 'block';
     });
     opts.appendChild(opt);
   });
   row.appendChild(opts);
-  container.appendChild(row);
-  document.getElementById('choice-exercises').appendChild(container);
+  box.appendChild(row);
+
+  const nextBtn = document.createElement('button');
+  nextBtn.textContent = 'Volgende';
+  nextBtn.style.display = 'none';
+  nextBtn.addEventListener('click', nextExercise);
+  box.appendChild(nextBtn);
+
+  container.appendChild(box);
 }
 
-fillData.forEach(createFillExercise);
-choiceData.forEach(createChoiceExercise);
+document.addEventListener('DOMContentLoaded', nextExercise);
 </script>
 </body>
 </html>
