@@ -89,23 +89,68 @@
   <h1>Klank- en letteroefeningen</h1>
   <div id="exercise"></div>
 <script>
-const ICONS = { boom: '🌳', dak: '🏠', bed: '🛏️' };
-
-const exercises = [
-  { type: 'fill', word: 'boom', blanks: [{index:0, letter:'b'}] },
-  { type: 'fill', word: 'dak',  blanks: [{index:0, letter:'d'}] },
-  { type: 'fill', word: 'bed',  blanks: [{index:0, letter:'b'}, {index:2, letter:'d'}] },
-  { type: 'choice', word: 'boom', correct: 'b', options: ['b','d','p'] },
-  { type: 'choice', word: 'dak',  correct: 'd', options: ['b','d','p'] },
-  { type: 'choice', word: 'bed',  correct: 'd', options: ['b','d','p'] }
+const WORDS = [
+  'bal','pop','pen','kip','kat','maan','vis','boom','dak','raam','auto',
+  'huis','deur','beer','boek','doos','stoel','tafel','fles','zon','ster',
+  'fiets','tas','ring','muur','kaas','schaap','neus','hand','teen','oog',
+  'ijs','peer','kom','vaas','snoep','tent','beker','jas','rok','broek',
+  'taart','doek','klas','goud','zilver','kers','wolf','koek','kaars','hond',
+  'sneeuw','regen','wind','rook','bloem','melk','rijst','kaart','bed','thee',
+  'suiker','vuur','vaart','lepel','vork','mes','zoon','zus','kroon','muis',
+  'slang','appel'
 ];
 
+const ICONS = {
+  bal:'⚽', pop:'🪆', pen:'✏️', kip:'🐔', kat:'🐱', maan:'🌙',
+  vis:'🐟', boom:'🌳', dak:'🏠', raam:'🪟', auto:'🚗',
+  huis:'🏠', deur:'🚪', beer:'🐻', boek:'📖', doos:'📦',
+  stoel:'🪑', tafel:'🍽️', fles:'🍾', zon:'🌞', ster:'⭐',
+  fiets:'🚲', tas:'👜', ring:'💍', muur:'🧱', kaas:'🧀',
+  schaap:'🐑', neus:'👃', hand:'✋', teen:'🦶', oog:'👁️',
+  ijs:'🧊', peer:'🍐', kom:'🥣', vaas:'🏺', snoep:'🍬',
+  tent:'⛺', beker:'🥤', jas:'🧥', rok:'👗', broek:'👖',
+  taart:'🍰', doek:'🧣', klas:'🏫', goud:'🥇', zilver:'🥈',
+  kers:'🍒', wolf:'🐺', koek:'🍪', kaars:'🕯️', hond:'🐶',
+  sneeuw:'❄️', regen:'🌧️', wind:'🌬️', rook:'💨', bloem:'🌸',
+  melk:'🥛', rijst:'🍚', kaart:'🗺️', bed:'🛏️', thee:'🍵',
+  suiker:'🍭', vuur:'🔥', vaart:'🚤', lepel:'🥄', vork:'🍴',
+  mes:'🔪', zoon:'👦', zus:'👧', kroon:'👑', muis:'🐭',
+  slang:'🐍', appel:'🍎'
+};
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function pickOptions(correct){
+  const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
+  const opts = [correct];
+  while(opts.length < 3){
+    const ch = letters[Math.floor(Math.random()*letters.length)];
+    if(ch !== correct && !opts.includes(ch)) opts.push(ch);
+  }
+  return shuffle(opts);
+}
+
+const exercises = [];
+WORDS.forEach(word => {
+  exercises.push({ type:'fill', word, blanks:[{index:0, letter:word[0]}] });
+  exercises.push({ type:'choice', word, index:word.length-1, correct:word[word.length-1], options: pickOptions(word[word.length-1]) });
+});
+shuffle(exercises);
 let current = 0;
 
 function nextExercise(){
   const container = document.getElementById('exercise');
   container.innerHTML = '';
-  if(current >= exercises.length) current = 0;
+  if(current >= exercises.length){
+    current = 0;
+    shuffle(exercises);
+  }
   const data = exercises[current++];
   if(data.type === 'fill') showFill(data, container);
   else showChoice(data, container);
@@ -167,6 +212,16 @@ function showFill(data, container){
 function showChoice(data, container){
   const box = document.createElement('div');
   box.className = 'exercise';
+
+  const wordBox = document.createElement('div');
+  wordBox.className = 'word-box';
+  [...data.word].forEach((ch, idx) => {
+    const span = document.createElement('div');
+    span.className = 'letter-box';
+    span.textContent = idx === data.index ? '_' : ch;
+    wordBox.appendChild(span);
+  });
+  box.appendChild(wordBox);
 
   const row = document.createElement('div');
   row.style.display = 'flex';
