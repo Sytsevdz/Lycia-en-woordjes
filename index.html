@@ -24,6 +24,13 @@
       'huis','deur','beer','boek','doos','stoel','tafel','fles','zon','ster'
     ];
 
+    const ICONS = {
+      bal: '⚽', pop: '🪆', pen: '✏️', kip: '🐔', kat: '🐱', maan: '🌙',
+      vis: '🐟', boom: '🌳', raam: '🪟', auto: '🚗',
+      huis: '🏠', deur: '🚪', beer: '🐻', boek: '📖', doos: '📦',
+      stoel: '🪑', tafel: '🍽️', fles: '🍾', zon: '🌞', ster: '⭐'
+    };
+
     // Kleine helper
     const pickRandom = arr => arr[Math.floor(Math.random() * arr.length)];
 
@@ -84,11 +91,9 @@
         return (
           React.createElement('div', { className: 'space-y-4' },
             React.createElement('h2', { className: 'text-xl font-bold text-center' }, display),
-            React.createElement('img', {
-              className: 'mx-auto w-40 h-40 object-cover rounded',
-              src: `https://source.unsplash.com/featured/300x300?${word}`,
-              alt: word
-            }),
+          React.createElement('div', {
+            className: 'mx-auto w-40 h-40 flex items-center justify-center text-6xl'
+          }, ICONS[word] || '❓'),
 
           // 👉 Invoerveld (alle modes hetzelfde)
           React.createElement('input', {
