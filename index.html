@@ -77,20 +77,34 @@
         setChecked(true);
       }
 
-      // ✏️ Weergave van het woord per mode
-      let display = '';
-      if (mode === 'first') {
-        display = '_' + word.slice(1);
-      } else if (mode === 'vowel') {
-        const i = [...word].findIndex(ch => 'aeiou'.includes(ch));
-        display = word.slice(0, i) + '_' + word.slice(i + 1);
-      } else {
-        display = word;
+      // ✏️ Weergave van het woord per mode in vakjes
+      function renderWord(){
+        const letters = [...word];
+        let hide = -1;
+        if (mode === 'first') {
+          hide = 0;
+        } else if (mode === 'vowel') {
+          hide = letters.findIndex(ch => 'aeiou'.includes(ch));
+        }
+        return React.createElement(
+          'div',
+          { className: 'flex justify-center space-x-1 text-2xl font-bold' },
+          letters.map((ch, idx) =>
+            React.createElement(
+              'div',
+              {
+                key: idx,
+                className: 'w-8 h-8 border-2 flex items-center justify-center',
+              },
+              idx === hide ? '' : ch
+            )
+          )
+        );
       }
 
-        return (
-          React.createElement('div', { className: 'space-y-4' },
-            React.createElement('h2', { className: 'text-xl font-bold text-center' }, display),
+          return (
+            React.createElement('div', { className: 'space-y-4' },
+              renderWord(),
           React.createElement('div', {
             className: 'mx-auto w-40 h-40 flex items-center justify-center text-6xl'
           }, ICONS[word] || '❓'),
