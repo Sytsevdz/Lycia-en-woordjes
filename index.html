@@ -20,19 +20,51 @@
 
     // ⚙️ Basis‑woordenlijst (CITO-frequent woorden groep 3)
     const WORDS = [
+      // basislijst
       'bal','pop','pen','kip','kat','maan','vis','boom','raam','auto',
-      'huis','deur','beer','boek','doos','stoel','tafel','fles','zon','ster'
+      'huis','deur','beer','boek','doos','stoel','tafel','fles','zon','ster',
+      // uitgebreid met extra woordjes
+      'fiets','tas','ring','muur','kaas','schaap','neus','hand','teen','oog',
+      'ijs','peer','kom','vaas','snoep','tent','beker','jas','rok','broek',
+      'taart','doek','klas','goud','zilver','kers','wolf','koek','kaars','hond',
+      'sneeuw','regen','wind','rook','bloem','melk','rijst','kaart','bed','thee',
+      'suiker','vuur','vaart','lepel','vork','mes','zoon','zus','kroon','muis',
+      'slang','appel'
     ];
 
     const ICONS = {
       bal: '⚽', pop: '🪆', pen: '✏️', kip: '🐔', kat: '🐱', maan: '🌙',
       vis: '🐟', boom: '🌳', raam: '🪟', auto: '🚗',
       huis: '🏠', deur: '🚪', beer: '🐻', boek: '📖', doos: '📦',
-      stoel: '🪑', tafel: '🍽️', fles: '🍾', zon: '🌞', ster: '⭐'
+      stoel: '🪑', tafel: '🍽️', fles: '🍾', zon: '🌞', ster: '⭐',
+      fiets: '🚲', tas: '👜', ring: '💍', muur: '🧱', kaas: '🧀',
+      schaap: '🐑', neus: '👃', hand: '✋', teen: '🦶', oog: '👁️',
+      ijs: '🧊', peer: '🍐', kom: '🥣', vaas: '🏺', snoep: '🍬',
+      tent: '⛺', beker: '🥤', jas: '🧥', rok: '👗', broek: '👖',
+      taart: '🍰', doek: '🧣', klas: '🏫', goud: '🥇', zilver: '🥈',
+      kers: '🍒', wolf: '🐺', koek: '🍪', kaars: '🕯️', hond: '🐶',
+      sneeuw: '❄️', regen: '🌧️', wind: '🌬️', rook: '💨', bloem: '🌸',
+      melk: '🥛', rijst: '🍚', kaart: '🗺️', bed: '🛏️', thee: '🍵',
+      suiker: '🍭', vuur: '🔥', vaart: '🚤', lepel: '🥄', vork: '🍴',
+      mes: '🔪', zoon: '👦', zus: '👧', kroon: '👑', muis: '🐭',
+      slang: '🐍', appel: '🍎'
     };
 
-    // Kleine helper
-    const pickRandom = arr => arr[Math.floor(Math.random() * arr.length)];
+    // Hulpfuncties
+    const shuffle = arr => {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    };
+
+    let queue = shuffle(WORDS);
+    function nextWord(){
+      if (queue.length === 0) queue = shuffle(WORDS);
+      return queue.pop();
+    }
 
     /**
      * Eén oefening (component)
@@ -42,14 +74,14 @@
      *  - begin  ➜ beginklank (knop) kiezen
      */
     function Exercise({ onDone }){
-      const [word, setWord]   = useState(pickRandom(WORDS));
+      const [word, setWord]   = useState(nextWord());
       const [mode]            = useState(['first','vowel','begin'][Math.floor(Math.random()*3)]);
       const [input, setInput] = useState('');
       const [checked, setChecked] = useState(false);
       const [correct, setCorrect] = useState(false);
 
       function reset(){
-        setWord(pickRandom(WORDS));
+        setWord(nextWord());
         setInput('');
         setChecked(false);
         setCorrect(false);
