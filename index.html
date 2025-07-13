@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Woordjes Oefenen - Groep 3</title>
+  <!-- Tailwind CSS via CDN (handig, geen build-stap nodig) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-blue-50 min-h-screen flex items-center justify-center">
+  <div id="root" class="w-full max-w-md p-4"></div>
+
+  <!-- React via CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+  <!-- De app zelf (ES‑module, dus moderne browsers nodig) -->
+  <script type="module">
+    const { useState, useEffect } = React;
+
+    // ⚙️ Basis‑woordenlijst (CITO-frequent woorden groep 3)
+    const WORDS = [
+      'bal','pop','pen','kip','kat','maan','vis','boom','raam','auto',
+      'huis','deur','beer','boek','doos','stoel','tafel','fles','zon','ster'
+    ];
+
+    // Kleine helper
+    const pickRandom = arr => arr[Math.floor(Math.random() * arr.length)];
+
+    /**
+     * Eén oefening (component)
+     * Modes:
+     *  - first  ➜ eerste letter invullen
+     *  - vowel  ➜ een klinker invullen
+     *  - begin  ➜ beginklank (knop) kiezen
+     */
+    function Exercise({ onDone }){
+      const [word, setWord]   = useState(pickRandom(WORDS));
+      const [mode]            = useState(['first','vowel','begin'][Math.floor(Math.random()*3)]);
+      const [input, setInput] = useState('');
+      const [checked, setChecked] = useState(false);
+      const [correct, setCorrect] = useState(false);
+
+      function reset(){
+        setWord(pickRandom(WORDS));
+        setInput('');
+        setChecked(false);
+        setCorrect(false);
+      }
+
+      function handleCheck(){
+        if (checked) {               // Na feedback ➜ volgende oefening
+          onDone(correct);
+          reset();
+          return;
+        }
+
+        let ok = false;
+        if (mode === 'first') {
+          ok = input.toLowerCase() === word[0];
+        }
+        if (mode === 'vowel') {
+          const i = [...word].findIndex(ch => 'aeiou'.includes(ch));
+          ok = input.toLowerCase() === word[i];
+        }
+        if (mode === 'begin') {
+          ok = input === word[0];
+        }
+        setCorrect(ok);
+        setChecked(true);
+      }
+
+      // ✏️ Weergave van het woord per mode
+      let display = '';
+      if (mode === 'first') {
+        display = '_' + word.slice(1);
+      } else if (mode === 'vowel') {
+        const i = [...word].findIndex(ch => 'aeiou'.includes(ch));
+        display = word.slice(0, i) + '_' + word.slice(i + 1);
+      } else {
+        display = word;
+      }
+
+      return (
+        React.createElement('div', { className: 'space-y-4' },
+          React.createElement('h2', { className: 'text-xl font-bold text-center' }, display),
+
+          // 👉 Invoerveld (alle modes hetzelfde)
+          React.createElement('input', {
+            className: 'border p-2 w-full text-center text-lg',
+            placeholder: 'Typ hier',
+            value: input,
+            onChange: e => setInput(e.target.value)
+          }),
+
+          // 🎉 Feedback (groen/rood)
+          checked && React.createElement('div', {
+            className: `text-center font-semibold ${correct ? 'text-green-600' : 'text-red-600'}`
+          }, correct ? 'Goed gedaan!' : 'Helaas, probeer volgende'),
+
+          // Actieknop
+          React.createElement('button', {
+            className: 'bg-indigo-600 text-white px-4 py-2 rounded w-full',
+            onClick: handleCheck
+          }, checked ? 'Volgende' : 'Controleer')
+        )
+      );
+    }
+
+    /**
+     * Hoofd‑component: score wordt in localStorage bewaard
+     */
+    function App(){
+      const [score, setScore] = useState(() => {
+        const s = localStorage.getItem('score');
+        return s ? JSON.parse(s) : { good: 0, total: 0 };
+      });
+
+      useEffect(() => {
+        localStorage.setItem('score', JSON.stringify(score));
+      }, [score]);
+
+      function handleDone(correct){
+        setScore(prev => ({ good: prev.good + (correct ? 1 : 0), total: prev.total + 1 }));
+      }
+
+      return (
+        React.createElement('div', { className: 'bg-white shadow-xl rounded-2xl p-6' },
+          React.createElement('h1', { className: 'text-2xl font-bold mb-4 text-center' }, 'Woordjes Oefenen'),
+          React.createElement(Exercise, { onDone: handleDone }),
+          React.createElement('div', { className: 'mt-6 text-center' },
+            React.createElement('p', { className: 'text-sm' }, `Score: ${score.good} / ${score.total}`)
+          )
+        )
+      );
+    }
+
+    // 🚀 Start de app
+    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+  </script>
+</body>
+</html>
