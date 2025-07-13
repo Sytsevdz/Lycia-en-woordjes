@@ -83,6 +83,12 @@
       border-color: #a855f7;
       color: #fff;
     }
+    .feedback {
+      text-align: center;
+      margin-top: 0.5rem;
+      color: #a855f7;
+      font-size: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -138,8 +144,21 @@ function pickOptions(correct){
 
 const exercises = [];
 WORDS.forEach(word => {
-  exercises.push({ type:'fill', word, blanks:[{index:0, letter:word[0]}] });
-  exercises.push({ type:'choice', word, index:word.length-1, correct:word[word.length-1], options: pickOptions(word[word.length-1]) });
+  const fillIndex = Math.floor(Math.random() * word.length);
+  exercises.push({
+    type: 'fill',
+    word,
+    blanks: [{ index: fillIndex, letter: word[fillIndex] }]
+  });
+
+  const choiceIndex = Math.floor(Math.random() * word.length);
+  exercises.push({
+    type: 'choice',
+    word,
+    index: choiceIndex,
+    correct: word[choiceIndex],
+    options: pickOptions(word[choiceIndex])
+  });
 });
 shuffle(exercises);
 let current = 0;
@@ -185,6 +204,10 @@ function showFill(data, container){
   });
   box.appendChild(wordBox);
 
+  const msg = document.createElement('div');
+  msg.className = 'feedback';
+  box.appendChild(msg);
+
   const btn = document.createElement('button');
   btn.textContent = 'Controleer';
   btn.addEventListener('click', () => {
@@ -192,10 +215,18 @@ function showFill(data, container){
       nextExercise();
       return;
     }
+    const inputs = wordBox.querySelectorAll('input');
+    let empty = false;
+    inputs.forEach(inp => { if(!inp.value) empty = true; });
+    if(empty){
+      msg.textContent = 'vul een letter in';
+      return;
+    }
     let ok = true;
-    wordBox.querySelectorAll('input').forEach(inp => {
+    inputs.forEach(inp => {
       if(inp.value.toLowerCase() !== inp.dataset.correct) ok = false;
     });
+    msg.textContent = '';
     if(ok){
       btn.textContent = 'Goed gedaan! Volgende';
       btn.style.background = '#4ade80';
