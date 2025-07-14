@@ -1,200 +1,305 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Woordjes Oefenen - Groep 3</title>
-  <!-- Tailwind CSS via CDN (handig, geen build-stap nodig) -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klank- en letteroefeningen</title>
+  <style>
+    body {
+      font-family: "Comic Sans MS", "Comic Sans", cursive;
+      background: #fff;
+      color: #000;
+      padding: 1rem;
+    }
+    h1 {
+      text-align: center;
+      color: #a855f7;
+    }
+    .exercise {
+      border: 2px solid #000;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .img-wrap {
+      display: flex;
+      justify-content: center;
+    }
+    .word-box {
+      display: flex;
+      justify-content: center;
+      gap: 0.25rem;
+      margin: 0.5rem 0;
+      font-size: 2rem;
+    }
+    .letter-box {
+      width: 2.2rem;
+      height: 2.2rem;
+      border: 2px solid #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .letter-input {
+      width: 2.2rem;
+      height: 2.2rem;
+      border: 2px solid #000;
+      text-align: center;
+      font-size: 2rem;
+    }
+    button {
+      margin: 0.5rem auto 0;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      background: #a855f7;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      display: block;
+    }
+    .options {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+    .option {
+      border: 2px solid #000;
+      border-radius: 50%;
+      width: 3rem;
+      height: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      cursor: pointer;
+    }
+    .option.correct {
+      background: #4ade80;
+      border-color: #4ade80;
+      color: #fff;
+    }
+    .option.wrong {
+      background: #a855f7;
+      border-color: #a855f7;
+      color: #fff;
+    }
+    .feedback {
+      text-align: center;
+      margin-top: 0.5rem;
+      color: #a855f7;
+      font-size: 1rem;
+    }
+  </style>
 </head>
-<body class="bg-blue-50 min-h-screen flex items-center justify-center">
-  <div id="root" class="w-full max-w-md p-4"></div>
+<body>
+  <h1>Klank- en letteroefeningen</h1>
+  <div id="exercise"></div>
+<script>
+const WORDS = [
+  'bal','pop','pen','kip','kat','maan','vis','boom','dak','raam','auto',
+  'huis','deur','beer','boek','doos','stoel','tafel','fles','zon','ster',
+  'fiets','tas','ring','muur','kaas','schaap','neus','hand','teen','oog',
+  'ijs','peer','kom','vaas','snoep','tent','beker','jas','rok','broek',
+  'taart','doek','klas','goud','zilver','kers','wolf','koek','kaars','hond',
+  'sneeuw','regen','wind','rook','bloem','melk','rijst','kaart','bed','thee',
+  'suiker','vuur','vaart','lepel','vork','mes','zoon','zus','kroon','muis',
+  'slang','appel'
+];
 
-  <!-- React via CDN -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+const ICONS = {
+  bal:'⚽', pop:'🪆', pen:'✏️', kip:'🐔', kat:'🐱', maan:'🌙',
+  vis:'🐟', boom:'🌳', dak:'🏠', raam:'🪟', auto:'🚗',
+  huis:'🏠', deur:'🚪', beer:'🐻', boek:'📖', doos:'📦',
+  stoel:'🪑', tafel:'🍽️', fles:'🍾', zon:'🌞', ster:'⭐',
+  fiets:'🚲', tas:'👜', ring:'💍', muur:'🧱', kaas:'🧀',
+  schaap:'🐑', neus:'👃', hand:'✋', teen:'🦶', oog:'👁️',
+  ijs:'🧊', peer:'🍐', kom:'🥣', vaas:'🏺', snoep:'🍬',
+  tent:'⛺', beker:'🥤', jas:'🧥', rok:'👗', broek:'👖',
+  taart:'🍰', doek:'🧣', klas:'🏫', goud:'🥇', zilver:'🥈',
+  kers:'🍒', wolf:'🐺', koek:'🍪', kaars:'🕯️', hond:'🐶',
+  sneeuw:'❄️', regen:'🌧️', wind:'🌬️', rook:'💨', bloem:'🌸',
+  melk:'🥛', rijst:'🍚', kaart:'🗺️', bed:'🛏️', thee:'🍵',
+  suiker:'🍭', vuur:'🔥', vaart:'🚤', lepel:'🥄', vork:'🍴',
+  mes:'🔪', zoon:'👦', zus:'👧', kroon:'👑', muis:'🐭',
+  slang:'🐍', appel:'🍎'
+};
 
-  <!-- De app zelf (ES‑module, dus moderne browsers nodig) -->
-  <script type="module">
-    const { useState, useEffect } = React;
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
 
-    // ⚙️ Basis‑woordenlijst (CITO-frequent woorden groep 3)
-    const WORDS = [
-      // basislijst
-      'bal','pop','pen','kip','kat','maan','vis','boom','raam','auto',
-      'huis','deur','beer','boek','doos','stoel','tafel','fles','zon','ster',
-      // uitgebreid met extra woordjes
-      'fiets','tas','ring','muur','kaas','schaap','neus','hand','teen','oog',
-      'ijs','peer','kom','vaas','snoep','tent','beker','jas','rok','broek',
-      'taart','doek','klas','goud','zilver','kers','wolf','koek','kaars','hond',
-      'sneeuw','regen','wind','rook','bloem','melk','rijst','kaart','bed','thee',
-      'suiker','vuur','vaart','lepel','vork','mes','zoon','zus','kroon','muis',
-      'slang','appel'
-    ];
+function pickOptions(correct){
+  const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
+  const opts = [correct];
+  while(opts.length < 3){
+    const ch = letters[Math.floor(Math.random()*letters.length)];
+    if(ch !== correct && !opts.includes(ch)) opts.push(ch);
+  }
+  return shuffle(opts);
+}
 
-    const ICONS = {
-      bal: '⚽', pop: '🪆', pen: '✏️', kip: '🐔', kat: '🐱', maan: '🌙',
-      vis: '🐟', boom: '🌳', raam: '🪟', auto: '🚗',
-      huis: '🏠', deur: '🚪', beer: '🐻', boek: '📖', doos: '📦',
-      stoel: '🪑', tafel: '🍽️', fles: '🍾', zon: '🌞', ster: '⭐',
-      fiets: '🚲', tas: '👜', ring: '💍', muur: '🧱', kaas: '🧀',
-      schaap: '🐑', neus: '👃', hand: '✋', teen: '🦶', oog: '👁️',
-      ijs: '🧊', peer: '🍐', kom: '🥣', vaas: '🏺', snoep: '🍬',
-      tent: '⛺', beker: '🥤', jas: '🧥', rok: '👗', broek: '👖',
-      taart: '🍰', doek: '🧣', klas: '🏫', goud: '🥇', zilver: '🥈',
-      kers: '🍒', wolf: '🐺', koek: '🍪', kaars: '🕯️', hond: '🐶',
-      sneeuw: '❄️', regen: '🌧️', wind: '🌬️', rook: '💨', bloem: '🌸',
-      melk: '🥛', rijst: '🍚', kaart: '🗺️', bed: '🛏️', thee: '🍵',
-      suiker: '🍭', vuur: '🔥', vaart: '🚤', lepel: '🥄', vork: '🍴',
-      mes: '🔪', zoon: '👦', zus: '👧', kroon: '👑', muis: '🐭',
-      slang: '🐍', appel: '🍎'
-    };
+const exercises = [];
+WORDS.forEach(word => {
+  const fillIndex = Math.floor(Math.random() * word.length);
+  exercises.push({
+    type: 'fill',
+    word,
+    blanks: [{ index: fillIndex, letter: word[fillIndex] }]
+  });
 
-    // Hulpfuncties
-    const shuffle = arr => {
-      const copy = [...arr];
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
-    };
+  const choiceIndex = Math.floor(Math.random() * word.length);
+  exercises.push({
+    type: 'choice',
+    word,
+    index: choiceIndex,
+    correct: word[choiceIndex],
+    options: pickOptions(word[choiceIndex])
+  });
+});
+shuffle(exercises);
+let current = 0;
 
-    let queue = shuffle(WORDS);
-    function nextWord(){
-      if (queue.length === 0) queue = shuffle(WORDS);
-      return queue.pop();
+function nextExercise(){
+  const container = document.getElementById('exercise');
+  container.innerHTML = '';
+  if(current >= exercises.length){
+    current = 0;
+    shuffle(exercises);
+  }
+  const data = exercises[current++];
+  if(data.type === 'fill') showFill(data, container);
+  else showChoice(data, container);
+}
+
+function showFill(data, container){
+  const box = document.createElement('div');
+  box.className = 'exercise';
+
+  const img = document.createElement('div');
+  img.className = 'img-wrap';
+  img.style.fontSize = '4rem';
+  img.textContent = ICONS[data.word] || '❓';
+  box.appendChild(img);
+
+  const wordBox = document.createElement('div');
+  wordBox.className = 'word-box';
+  [...data.word].forEach((ch, idx) => {
+    const blank = data.blanks.find(b => b.index === idx);
+    if(blank){
+      const input = document.createElement('input');
+      input.className = 'letter-input';
+      input.maxLength = 1;
+      input.dataset.correct = blank.letter;
+      wordBox.appendChild(input);
+    } else {
+      const span = document.createElement('div');
+      span.className = 'letter-box';
+      span.textContent = ch;
+      wordBox.appendChild(span);
     }
+  });
+  box.appendChild(wordBox);
 
-    /**
-     * Eén oefening (component)
-     * Modes:
-    *  - first  ➜ eerste letter invullen
-    *  - last   ➜ laatste letter invullen
-    *  - vowel  ➜ een klinker invullen
-     */
-    function Exercise({ onDone }){
-      const [word, setWord]   = useState(nextWord());
-      const [mode]            = useState(['first','last','vowel'][Math.floor(Math.random()*3)]);
-      const [input, setInput] = useState('');
-      const [checked, setChecked] = useState(false);
-      const [correct, setCorrect] = useState(false);
+  const msg = document.createElement('div');
+  msg.className = 'feedback';
+  box.appendChild(msg);
 
-      function reset(){
-        setWord(nextWord());
-        setInput('');
-        setChecked(false);
-        setCorrect(false);
-      }
-
-      function handleCheck(){
-        if (checked) {               // Na feedback ➜ volgende oefening
-          onDone(correct);
-          reset();
-          return;
-        }
-
-        let ok = false;
-        if (mode === 'first') {
-          ok = input.toLowerCase() === word[0];
-        }
-        if (mode === 'vowel') {
-          const i = [...word].findIndex(ch => 'aeiou'.includes(ch));
-          ok = input.toLowerCase() === word[i];
-        }
-        if (mode === 'last') {
-          ok = input.toLowerCase() === word[word.length - 1];
-        }
-        setCorrect(ok);
-        setChecked(true);
-      }
-
-      // ✏️ Weergave van het woord per mode in vakjes
-      function renderWord(){
-        const letters = [...word];
-        let hide = -1;
-        if (mode === 'first') {
-          hide = 0;
-        } else if (mode === 'last') {
-          hide = letters.length - 1;
-        } else if (mode === 'vowel') {
-          hide = letters.findIndex(ch => 'aeiou'.includes(ch));
-        }
-        return React.createElement(
-          'div',
-          { className: 'flex justify-center space-x-1 text-2xl font-bold' },
-          letters.map((ch, idx) =>
-            React.createElement(
-              'div',
-              {
-                key: idx,
-                className: 'w-8 h-8 border-2 flex items-center justify-center',
-              },
-              idx === hide ? '' : ch
-            )
-          )
-        );
-      }
-
-          return (
-            React.createElement('div', { className: 'space-y-4' },
-              renderWord(),
-          React.createElement('div', {
-            className: 'mx-auto w-40 h-40 flex items-center justify-center text-6xl'
-          }, ICONS[word] || '❓'),
-
-          // 👉 Invoerveld (alle modes hetzelfde)
-          React.createElement('input', {
-            className: 'border p-2 w-full text-center text-lg',
-            placeholder: 'Typ hier',
-            value: input,
-            onChange: e => setInput(e.target.value)
-          }),
-
-          // 🎉 Feedback (groen/rood)
-          checked && React.createElement('div', {
-            className: `text-center font-semibold ${correct ? 'text-green-600' : 'text-red-600'}`
-          }, correct ? 'Goed gedaan!' : 'Helaas, probeer volgende'),
-
-          // Actieknop
-          React.createElement('button', {
-            className: 'bg-indigo-600 text-white px-4 py-2 rounded w-full',
-            onClick: handleCheck
-          }, checked ? 'Volgende' : 'Controleer')
-        )
-      );
+  const btn = document.createElement('button');
+  btn.textContent = 'Controleer';
+  btn.addEventListener('click', () => {
+    if(btn.dataset.checked){
+      nextExercise();
+      return;
     }
-
-    /**
-     * Hoofd‑component: score wordt in localStorage bewaard
-     */
-    function App(){
-      const [score, setScore] = useState(() => {
-        const s = localStorage.getItem('score');
-        return s ? JSON.parse(s) : { good: 0, total: 0 };
-      });
-
-      useEffect(() => {
-        localStorage.setItem('score', JSON.stringify(score));
-      }, [score]);
-
-      function handleDone(correct){
-        setScore(prev => ({ good: prev.good + (correct ? 1 : 0), total: prev.total + 1 }));
-      }
-
-      return (
-        React.createElement('div', { className: 'bg-white shadow-xl rounded-2xl p-6' },
-          React.createElement('h1', { className: 'text-2xl font-bold mb-4 text-center' }, 'Woordjes Oefenen'),
-          React.createElement(Exercise, { onDone: handleDone }),
-          React.createElement('div', { className: 'mt-6 text-center' },
-            React.createElement('p', { className: 'text-sm' }, `Score: ${score.good} / ${score.total}`)
-          )
-        )
-      );
+    const inputs = wordBox.querySelectorAll('input');
+    let empty = false;
+    inputs.forEach(inp => { if(!inp.value) empty = true; });
+    if(empty){
+      msg.textContent = 'vul een letter in';
+      return;
     }
+    let ok = true;
+    inputs.forEach(inp => {
+      if(inp.value.toLowerCase() !== inp.dataset.correct) ok = false;
+    });
+    msg.textContent = '';
+    if(ok){
+      btn.textContent = 'Goed gedaan! Volgende';
+      btn.style.background = '#4ade80';
+    } else {
+      btn.textContent = 'Helaas, volgende';
+      btn.style.background = '#a855f7';
+    }
+    btn.dataset.checked = 'true';
+  });
+  box.appendChild(btn);
+  container.appendChild(box);
+}
 
-    // 🚀 Start de app
-    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
-  </script>
+function showChoice(data, container){
+  const box = document.createElement('div');
+  box.className = 'exercise';
+
+  const wordBox = document.createElement('div');
+  wordBox.className = 'word-box';
+  [...data.word].forEach((ch, idx) => {
+    const span = document.createElement('div');
+    span.className = 'letter-box';
+    span.textContent = idx === data.index ? '_' : ch;
+    wordBox.appendChild(span);
+  });
+  box.appendChild(wordBox);
+
+  const row = document.createElement('div');
+  row.style.display = 'flex';
+  row.style.alignItems = 'center';
+  row.style.justifyContent = 'center';
+  row.style.gap = '1rem';
+
+  const img = document.createElement('div');
+  img.style.fontSize = '4rem';
+  img.textContent = ICONS[data.word] || '❓';
+  row.appendChild(img);
+
+  const opts = document.createElement('div');
+  opts.className = 'options';
+  let clicked = false;
+  data.options.forEach(letter => {
+    const opt = document.createElement('div');
+    opt.className = 'option';
+    opt.textContent = letter;
+    opt.addEventListener('click', () => {
+      if(clicked) return;
+      clicked = true;
+      if(letter === data.correct){
+        opt.classList.add('correct');
+      } else {
+        opt.classList.add('wrong');
+        Array.from(opts.children).forEach(o => {
+          if(o.textContent === data.correct) o.classList.add('correct');
+        });
+      }
+      nextBtn.style.display = 'block';
+    });
+    opts.appendChild(opt);
+  });
+  row.appendChild(opts);
+  box.appendChild(row);
+
+  const nextBtn = document.createElement('button');
+  nextBtn.textContent = 'Volgende';
+  nextBtn.style.display = 'none';
+  nextBtn.addEventListener('click', nextExercise);
+  box.appendChild(nextBtn);
+
+  container.appendChild(box);
+}
+
+document.addEventListener('DOMContentLoaded', nextExercise);
+</script>
 </body>
 </html>
